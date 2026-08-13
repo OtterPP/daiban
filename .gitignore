@@ -1,0 +1,45 @@
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Secrets — never commit API keys
+.env
+.env.*
+*.pem
+secrets/
+**/api-key*
+**/apikey*
+**/*credentials*
+Config.local.swift
+openai.key
+xai.key
+
+# App data (todos live in Application Support, not here)
+*.json.bak
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Python leftovers (this app is Swift-only)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
