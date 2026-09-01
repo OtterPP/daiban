@@ -78,15 +78,24 @@ struct TodoRowView: View {
 
     /// Recorded time is always shown. 「过期」 is only for incomplete past-due items;
     /// completed rows keep struck-through title styling and never show the red badge.
+    /// `TimelineView` refreshes at `dueAt` so an open popover can flip to overdue
+    /// without a hover or store mutation.
     private var subtitle: some View {
-        HStack(spacing: 6) {
-            Text("记下 \(TodoItem.displayDate(item.createdAt))")
-                .foregroundStyle(.secondary)
-            if item.isOverdue, let dueAt = item.dueAt {
-                Text("过期 · \(TodoItem.displayDate(dueAt))")
-                    .foregroundStyle(Color(.systemRed))
+        TimelineView(.explicit(overdueRefreshDates)) { context in
+            HStack(spacing: 6) {
+                Text("记下 \(TodoItem.displayDate(item.createdAt))")
+                    .foregroundStyle(.secondary)
+                if item.isOverdue(at: context.date), let dueAt = item.dueAt {
+                    Text("过期 · \(TodoItem.displayDate(dueAt))")
+                        .foregroundStyle(Color(.systemRed))
+                }
             }
+            .font(.caption)
         }
-        .font(.caption)
+    }
+
+    private var overdueRefreshDates: [Date] {
+        guard !item.isDone, let dueAt = item.dueAt, dueAt > Date() else { return [] }
+        return [dueAt]
     }
 }

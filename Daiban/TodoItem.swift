@@ -63,17 +63,58 @@ struct TodoItem: Identifiable, Codable, Equatable, Hashable {
             minute = parsedMinute
         }
 
+        // Invalid components must keep the original title. Calendar is lenient
+        // and would otherwise turn `2月30日` into March 2 and `25:00` into 01:00.
+        guard let dueAt = exactDueDate(
+            month: month,
+            day: day,
+            hour: hour,
+            minute: minute,
+            now: now,
+            calendar: calendar
+        ) else {
+            return (trimmed, nil)
+        }
+
+        let prefix = trimmed[..<fullRange.lowerBound]
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return (prefix.isEmpty ? trimmed : String(prefix), dueAt)
+    }
+
+    private static func exactDueDate(
+        month: Int,
+        day: Int,
+        hour: Int,
+        minute: Int,
+        now: Date,
+        calendar: Calendar
+    ) -> Date? {
+        guard (1...12).contains(month),
+              (1...31).contains(day),
+              (0...23).contains(hour),
+              (0...59).contains(minute)
+        else {
+            return nil
+        }
+
         var components = calendar.dateComponents([.year], from: now)
         components.month = month
         components.day = day
         components.hour = hour
         components.minute = minute
         components.second = 0
-        let dueAt = calendar.date(from: components)
 
-        let prefix = trimmed[..<fullRange.lowerBound]
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return (prefix.isEmpty ? trimmed : String(prefix), dueAt)
+        guard let dueAt = calendar.date(from: components) else { return nil }
+
+        let roundTrip = calendar.dateComponents([.month, .day, .hour, .minute], from: dueAt)
+        guard roundTrip.month == month,
+              roundTrip.day == day,
+              roundTrip.hour == hour,
+              roundTrip.minute == minute
+        else {
+            return nil
+        }
+        return dueAt
     }
 
     static func displayDate(_ date: Date) -> String {
