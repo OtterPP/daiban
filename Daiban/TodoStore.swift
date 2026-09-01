@@ -44,9 +44,9 @@ final class TodoStore: ObservableObject {
     }
 
     func add(_ rawTitle: String) {
-        let title = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty else { return }
-        items.insert(TodoItem(title: title), at: 0)
+        let parsed = TodoItem.parseCapture(rawTitle)
+        guard !parsed.title.isEmpty else { return }
+        items.insert(TodoItem(title: parsed.title, dueAt: parsed.dueAt), at: 0)
         persist()
     }
 

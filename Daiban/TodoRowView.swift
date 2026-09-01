@@ -20,12 +20,16 @@ struct TodoRowView: View {
             .help(item.isDone ? "标为未完成" : "完成")
 
             Button(action: onToggle) {
-                Text(item.title)
-                    .font(.body)
-                    .strikethrough(item.isDone)
-                    .foregroundStyle(item.isDone ? .secondary : .primary)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.title)
+                        .font(.body)
+                        .strikethrough(item.isDone)
+                        .foregroundStyle(item.isDone ? .secondary : .primary)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    subtitle
+                }
             }
             .buttonStyle(.plain)
             .help(item.isDone ? "点一下恢复" : "点一下完成")
@@ -70,5 +74,19 @@ struct TodoRowView: View {
             Divider()
             Button("删除", role: .destructive, action: onDelete)
         }
+    }
+
+    /// Recorded time is always shown. 「过期」 is only for incomplete past-due items;
+    /// completed rows keep struck-through title styling and never show the red badge.
+    private var subtitle: some View {
+        HStack(spacing: 6) {
+            Text("记下 \(TodoItem.displayDate(item.createdAt))")
+                .foregroundStyle(.secondary)
+            if item.isOverdue, let dueAt = item.dueAt {
+                Text("过期 · \(TodoItem.displayDate(dueAt))")
+                    .foregroundStyle(Color(.systemRed))
+            }
+        }
+        .font(.caption)
     }
 }
